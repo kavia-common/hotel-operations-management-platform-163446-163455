@@ -1,47 +1,65 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import "./index.css";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Sidebar from "./components/Sidebar";
+import Topbar from "./components/Topbar";
+import HousekeepingDashboard from "./pages/HousekeepingDashboard";
+import ManagementDashboard from "./pages/ManagementDashboard";
+import RoomDetails from "./pages/RoomDetails";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * App is the root component which wires routing and global providers.
+ * It renders the main layout (Sidebar + Topbar + content) for protected routes.
+ */
 function App() {
-  const [theme, setTheme] = useState('light');
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<ProtectedLayout />}>
+            <Route index element={<Navigate to="/housekeeping" replace />} />
+            <Route path="housekeeping" element={<HousekeepingDashboard />} />
+            <Route path="management" element={<ManagementDashboard />} />
+            <Route path="room/:id" element={<RoomDetails />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
 
-  // Effect to apply theme to document element
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+/**
+ * Protected layout wrapper. Shows main layout when authenticated.
+ */
+function ProtectedLayout() {
+  const { user } = useAuth();
 
-  // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="min-h-screen bg-slate-900 text-slate-100">
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 min-h-screen">
+          <Topbar />
+          <div className="p-4 md:p-6 lg:p-8">
+            <Routes>
+              <Route index element={<Navigate to="/housekeeping" replace />} />
+              <Route path="/housekeeping" element={<HousekeepingDashboard />} />
+              <Route path="/management" element={<ManagementDashboard />} />
+              <Route path="/room/:id" element={<RoomDetails />} />
+            </Routes>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
