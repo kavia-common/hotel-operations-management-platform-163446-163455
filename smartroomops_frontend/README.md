@@ -8,8 +8,8 @@ A modern, clean, minimalistic React dashboard for hotel operations with Tailwind
 - Task/checklist management with photo uploads
 - Notifications panel (urgent rooms, guest requests)
 - Analytics with Recharts (efficiency, completion, quality)
-- Role-based access (Housekeeping, Supervisor, Manager)
 - Simple forecasting and supervisor verification
+- No login required (authentication removed)
 
 ## Setup
 1. Copy environment example and edit values as needed:
@@ -29,3 +29,4 @@ A modern, clean, minimalistic React dashboard for hotel operations with Tailwind
 ## Notes
 - This is a prototype; API endpoints are assumed to exist on the backend.
 - Styling uses TailwindCSS utility classes for a minimal, responsive layout.
+- Authentication and protected routes have been removed; users can access all features directly.

@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import useNotifications from "../hooks/useNotifications";
 
 /**
  * PUBLIC_INTERFACE
- * Topbar shows notifications, quick search, and user actions.
+ * Topbar shows notifications and header.
+ * Authentication has been removed; user actions are not shown.
  */
 export default function Topbar() {
-  const { user, logout } = useAuth();
   const { items, unread, markRead } = useNotifications();
   const [open, setOpen] = useState(false);
 
@@ -46,8 +45,6 @@ export default function Topbar() {
               </div>
             )}
           </div>
-          <div className="text-sm text-slate-300">{user?.name}</div>
-          <button className="btn btn-secondary" onClick={logout}>Logout</button>
         </div>
       </div>
     </header>
