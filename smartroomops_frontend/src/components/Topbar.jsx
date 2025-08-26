@@ -15,7 +15,7 @@ export default function Topbar() {
       <div className="flex items-center justify-between px-4 md:px-6 py-3">
         <div className="flex items-center gap-3">
           <div className="text-lg font-semibold">Dashboard</div>
-          <span className="badge badge-blue">Real-time</span>
+          <span className="badge badge-blue">Demo data</span>
         </div>
         <div className="flex items-center gap-4">
           <div className="relative">

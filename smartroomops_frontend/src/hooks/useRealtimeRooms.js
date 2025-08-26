@@ -1,66 +1,36 @@
-import { useEffect, useRef, useState } from "react";
-import { getWSUrl } from "../services/api";
+import { useEffect, useState } from "react";
+import { mockEmitter, mockGetRooms, startMockRealtime, stopMockRealtime } from "../services/mockData";
 
 /**
  * PUBLIC_INTERFACE
- * useRealtimeRooms subscribes to real-time room status updates over WebSocket.
- * Falls back to polling if WS is not available.
+ * useRealtimeRooms subscribes to realtime-like room updates from mock emitter.
+ * Always provides data even without a backend.
  */
 export default function useRealtimeRooms() {
   const [rooms, setRooms] = useState([]);
-  const [connected, setConnected] = useState(false);
-  const wsRef = useRef(null);
+  const [connected, setConnected] = useState(true); // mock is always "connected"
 
   useEffect(() => {
-    let ws;
-    try {
-      ws = new WebSocket(`${getWSUrl().replace(/^http/, "ws")}/ws/rooms`);
-      wsRef.current = ws;
-      ws.onopen = () => setConnected(true);
-      ws.onclose = () => setConnected(false);
-      ws.onerror = () => setConnected(false);
-      ws.onmessage = (evt) => {
-        try {
-          const data = JSON.parse(evt.data);
-          if (Array.isArray(data?.rooms)) {
-            setRooms(data.rooms);
-          } else if (data?.type === "room_update") {
-            setRooms((prev) => {
-              const idx = prev.findIndex((r) => r.id === data.room.id);
-              if (idx >= 0) {
-                const copy = prev.slice();
-                copy[idx] = data.room;
-                return copy;
-              }
-              return [data.room, ...prev];
-            });
+    let unsub;
+    mockGetRooms().then(setRooms);
+    startMockRealtime();
+    unsub = mockEmitter.on("room_update", (payload) => {
+      if (payload?.room) {
+        setRooms((prev) => {
+          const idx = prev.findIndex((r) => r.id === payload.room.id);
+          if (idx >= 0) {
+            const copy = prev.slice();
+            copy[idx] = payload.room;
+            return copy;
           }
-        } catch {
-          // ignore malformed
-        }
-      };
-    } catch {
-      // ignored, fallback to polling
-    }
-
-    let poll;
-    if (!ws) {
-      poll = setInterval(async () => {
-        try {
-          const resp = await fetch("/rooms"); // likely proxied in dev; otherwise use api.js
-          const json = await resp.json();
-          setRooms(json);
-        } catch {
-          // ignore
-        }
-      }, 5000);
-    }
+          return [payload.room, ...prev];
+        });
+      }
+    });
 
     return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-      if (poll) clearInterval(poll);
+      unsub && unsub();
+      stopMockRealtime();
     };
   }, []);
 

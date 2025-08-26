@@ -4,6 +4,7 @@ import { apiFetch } from "../services/api";
 /**
  * PUBLIC_INTERFACE
  * useNotifications polls notifications for urgent rooms/guest requests.
+ * Uses mock API via apiFetch fallback to ensure offline behavior.
  */
 export default function useNotifications() {
   const [items, setItems] = useState([]);
